@@ -1,0 +1,386 @@
+{% extends 'register.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priyelle Glow - Personalized Beauty Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f9f0ff 0%, #fef2ff 100%);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 85vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            opacity: 0.08;
+            z-index: -1;
+        }
+
+        .logo {
+            font-size: 3.2rem;
+            font-weight: 300;
+            color: #d1478c;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo span {
+            font-weight: 700;
+            color: #b32d6e;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .main-heading {
+            font-size: 4.2rem;
+            font-weight: 300;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .main-heading span {
+            font-weight: 700;
+            color: #d1478c;
+            background: linear-gradient(90deg, #d1478c, #ff7eb3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 700px;
+            line-height: 1.7;
+            margin-bottom: 50px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #d1478c 0%, #ff7eb3 100%);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 18px 45px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(209, 71, 140, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(209, 71, 140, 0.4);
+        }
+
+        .cta-button:active {
+            transform: translateY(-2px);
+        }
+
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #b32d6e 0%, #e65c9c 100%);
+            border-radius: 50px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cta-button:hover::after {
+            opacity: 1;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 80px;
+            margin-bottom: 60px;
+        }
+
+        .feature {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            width: 280px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #d1478c;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 40px;
+        }
+
+        .beauty-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 126, 179, 0.1) 0%, rgba(255, 126, 179, 0) 70%);
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            right: 5%;
+        }
+
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: 20%;
+            left: 5%;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(255, 126, 179, 0.3);
+        }
+
+        .sparkle-1 {
+            top: 25%;
+            left: 10%;
+        }
+
+        .sparkle-2 {
+            top: 60%;
+            right: 15%;
+        }
+
+        .sparkle-3 {
+            bottom: 30%;
+            left: 20%;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-heading {
+                font-size: 3rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .tagline {
+                font-size: 1.2rem;
+            }
+            
+            .description {
+                font-size: 1rem;
+                padding: 0 10px;
+            }
+            
+            .cta-button {
+                font-size: 1.2rem;
+                padding: 15px 35px;
+            }
+            
+            .feature {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            .circle-1, .circle-2 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-heading {
+                font-size: 2.5rem;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .hero-section {
+                padding: 20px 10px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="beauty-elements">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="sparkle sparkle-1"><i class="fas fa-sparkle"></i></div>
+        <div class="sparkle sparkle-2"><i class="fas fa-sparkle"></i></div>
+        <div class="sparkle sparkle-3"><i class="fas fa-sparkle"></i></div>
+    </div>
+
+    <div class="container">
+        <section class="hero-section">
+            <h1 class="logo">Priyelle<span>Glow</span></h1>
+            <p class="tagline">Personalized skin & makeup analysis</p>
+            
+            <h1 class="main-heading">Discover Your <span>Perfect Glow</span></h1>
+            
+            <p class="description">
+                Experience the future of beauty with our AI-powered skin and makeup analysis. 
+                Get personalized recommendations, discover products that work for your unique skin type, 
+                and unlock your most radiant self.
+            </p>
+            
+            <a href="/register/" class="cta-button">
+                <i class="fas fa-magic" style="margin-right: 10px;"></i> Analyze Your Skin Now
+            </a>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3 class="feature-title">Personalized Analysis</h3>
+                    <p class="feature-desc">Our AI technology analyzes your unique skin characteristics to provide tailored recommendations.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="feature-title">Skin Health Focus</h3>
+                    <p class="feature-desc">We prioritize your skin's health while helping you achieve your desired makeup looks.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3 class="feature-title">Premium Recommendations</h3>
+                    <p class="feature-desc">Get product suggestions from both high-end and affordable brands that suit your needs.</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>&copy; 2025 Priyelle Glow. All rights reserved. | Beauty reimagined through technology</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add a simple animation to the CTA button
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctaButton = document.querySelector('.cta-button');
+            
+            ctaButton.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            ctaButton.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+            
+            // Add floating animation to sparkles
+            const sparkles = document.querySelectorAll('.sparkle');
+            sparkles.forEach((sparkle, index) => {
+                // Randomize initial position a bit
+                const randomX = Math.random() * 20 - 10;
+                const randomY = Math.random() * 20 - 10;
+                sparkle.style.transform = `translate(${randomX}px, ${randomY}px)`;
+                
+                // Add floating animation
+                setInterval(() => {
+                    const x = Math.random() * 15 - 7.5;
+                    const y = Math.random() * 15 - 7.5;
+                    sparkle.style.transform = `translate(${x}px, ${y}px)`;
+                }, 2000 + index * 500);
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,5 @@
+<form method="post">{% csrf_token %}
+<p>Delete product?</p>
+<button>Yes</button>
+</form>
+<a href="{% url 'product_list' %}">Cancel</a>

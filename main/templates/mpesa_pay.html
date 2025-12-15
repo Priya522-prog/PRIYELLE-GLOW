@@ -1,0 +1,5 @@
+<form method="post">{% csrf_token %}
+<input name="phone" placeholder="07XXXXXXXX">
+<button>Pay</button>
+</form>
+<a href="{% url 'cart_detail' %}">Back to Cart</a>

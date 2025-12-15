@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="text-center fw-bold">Priyelle Glow – Skin Analysis</h2>
+    <p class="text-center text-muted">
+        Capture your face to receive personalized skincare and makeup recommendations.
+    </p>
+
+    <!-- CAMERA SECTION -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-5">
+            <div class="card shadow-lg p-4 text-center">
+
+                <!-- CAMERA -->
+                <div class="camera-wrapper mx-auto mb-3">
+                    <video id="video" autoplay></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+
+                <!-- BUTTONS -->
+                <button class="btn btn-outline-primary w-100 mb-2"
+                        onclick="captureImage()">
+                    📸 Capture Image
+                </button>
+
+                <!-- FORM -->
+                <form method="post" enctype="multipart/form-data" id="analysisForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="captured_image" id="captured_image">
+
+                    <button type="button"
+                            class="btn btn-primary w-100"
+                            onclick="submitAnalysis()">
+                        Analyze My Skin ✨
+                    </button>
+                </form>
+
+                <!-- LOADING -->
+                <div id="loadingOverlay" style="display:none;" class="mt-3">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-2">Analyzing your skin...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT SECTION -->
+    <div class="mt-5">
+        <h3 class="text-center mb-4">Recommended Skincare & Makeup</h3>
+
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ product.image.url }}"
+                         class="card-img-top"
+                         alt="{{ product.name }}">
+                    <div class="card-body text-center">
+                        <h6 class="fw-bold">{{ product.name }}</h6>
+                        <p class="small text-muted">{{ product.description }}</p>
+                        <p class="fw-bold text-success">KSh {{ product.price }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted">
+                Products will appear after analysis.
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- STYLES -->
+<style>
+.camera-wrapper {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #ff69b4;
+}
+
+.camera-wrapper video,
+.camera-wrapper canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+canvas {
+    display: none;
+}
+</style>
+
+<!-- SCRIPT -->
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const imageInput = document.getElementById('captured_image');
+const loading = document.getElementById('loadingOverlay');
+
+// ACCESS CAMERA
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(() => alert("Camera access denied"));
+
+// STEP 1: CAPTURE IMAGE
+function captureImage() {
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.style.display = 'block';
+    video.style.display = 'none';
+
+    imageInput.value = canvas.toDataURL('image/png');
+}
+
+// STEP 2: ANALYZE
+function submitAnalysis() {
+    if (!imageInput.value) {
+        alert("Please capture an image first.");
+        return;
+    }
+    loading.style.display = 'block';
+    document.getElementById('analysisForm').submit();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Skin Analysis</h2>
+<video id="video" autoplay></video>
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<input type="file" name="image">
+<button>Analyze</button>
+</form>
+{% load static %}
+<script src="{% static 'js/camera.js' %}"></script>
+{% endblock %}

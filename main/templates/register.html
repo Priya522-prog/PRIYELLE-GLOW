@@ -1,0 +1,852 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-3">
+    <a class="navbar-brand fw-bold text-primary" href="/">
+        <i class="fas fa-sparkles me-2"></i>Priyelle Glow
+    </a>
+    <div class="ms-auto">
+        <a href="{% url 'login' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+            <i class="fas fa-sign-in-alt me-1"></i> Login
+        </a>
+    </div>
+</nav>
+
+<!-- PAGE WRAPPER -->
+<div class="auth-page-wrapper">
+    <div class="auth-container">
+        <!-- LEFT SIDE - VISUAL/BENEFITS -->
+        <div class="auth-visual-side">
+            <div class="visual-content">
+                <div class="logo-circle-large">
+                    <span class="logo-text">P</span>
+                </div>
+                <h1 class="visual-title">Join Priyelle Glow</h1>
+                <p class="visual-subtitle">Your Personalized Beauty Journey Begins Here</p>
+                
+                <div class="benefits-container">
+                    <div class="benefit-card">
+                        <div class="benefit-icon-circle">
+                            <i class="fas fa-sparkles"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h5>Personalized Skin Analysis</h5>
+                            <p class="benefit-description">Get AI-powered recommendations tailored to your unique skin type</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon-circle">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h5>Makeup Matching</h5>
+                            <p class="benefit-description">Discover perfect makeup shades for your complexion</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon-circle">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="benefit-content">
+                            <h5>Skin Health Tracking</h5>
+                            <p class="benefit-description">Monitor your skin's progress with regular check-ins</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <p class="testimonial-quote">"Priyelle Glow transformed my skincare routine. The personalized recommendations are spot on!"</p>
+                    <p class="testimonial-author">— Sarah M., Premium Member</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE - REGISTRATION FORM -->
+        <div class="auth-form-side">
+            <div class="form-card">
+                <div class="form-header-section">
+                    <h2 class="form-title">Create Your Account</h2>
+                    <p class="form-subtitle">
+                        Start your personalized beauty journey in minutes
+                    </p>
+                </div>
+
+                <!-- REGISTRATION FORM -->
+                <form method="post" action="{% url 'register' %}" class="registration-form">
+                    {% csrf_token %}
+                    
+                    <!-- Display form errors if any -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Please fix the errors below:</strong>
+                        <ul class="mb-0 mt-1">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    id="first_name"
+                                    class="form-control form-input"
+                                    placeholder="Jane"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    id="last_name"
+                                    class="form-control form-input"
+                                    placeholder="Doe"
+                                    required
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input
+                            type="text"
+                            name="username"
+                            id="username"
+                            class="form-control form-input"
+                            placeholder="janedoe"
+                            required
+                        >
+                        <div class="form-hint">This will be your unique identifier</div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input
+                            type="email"
+                            name="email"
+                            id="email"
+                            class="form-control form-input"
+                            placeholder="jane@example.com"
+                            required
+                        >
+                        <div class="form-hint">We'll never share your email with anyone</div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="password1" class="form-label">Password</label>
+                        <div class="password-input-wrapper">
+                            <input
+                                type="password"
+                                name="password1"
+                                id="password1"
+                                class="form-control form-input"
+                                placeholder="Create a strong password"
+                                required
+                            >
+                            <button type="button" class="password-toggle-btn" id="togglePassword1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength-container mt-2">
+                            <div class="password-strength-bar">
+                                <div class="strength-segment" id="segment1"></div>
+                                <div class="strength-segment" id="segment2"></div>
+                                <div class="strength-segment" id="segment3"></div>
+                                <div class="strength-segment" id="segment4"></div>
+                            </div>
+                            <small class="strength-text" id="strengthText">Password strength</small>
+                        </div>
+                        <div class="password-requirements mt-2">
+                            <small class="text-muted">Use at least 8 characters with a mix of letters, numbers & symbols</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="password2" class="form-label">Confirm Password</label>
+                        <div class="password-input-wrapper">
+                            <input
+                                type="password"
+                                name="password2"
+                                id="password2"
+                                class="form-control form-input"
+                                placeholder="Confirm your password"
+                                required
+                            >
+                            <button type="button" class="password-toggle-btn" id="togglePassword2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Subscribe to beauty tips and exclusive offers
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 submit-btn mt-4">
+                        <i class="fas fa-sparkles me-2"></i> Create Account
+                    </button>
+                </form>
+
+                <!-- DIVIDER -->
+                <div class="divider-line mt-4 mb-4">
+                    <span class="divider-text">or sign up with</span>
+                </div>
+
+                <!-- SOCIAL REGISTRATION -->
+                <div class="social-buttons">
+                    <button type="button" class="btn btn-outline-secondary w-100 social-btn mb-3">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" width="18" height="18" class="me-2">
+                        <span>Continue with Google</span>
+                    </button>
+                    
+                    <button type="button" class="btn btn-outline-secondary w-100 social-btn">
+                        <i class="fab fa-facebook text-primary me-2"></i>
+                        <span>Continue with Facebook</span>
+                    </button>
+                </div>
+
+                <!-- LOGIN LINK -->
+                <div class="login-redirect text-center mt-4 pt-3">
+                    <p class="mb-0">
+                        Already have an account?
+                        <a href="{% url 'login' %}" class="text-decoration-none fw-semibold ms-1">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STYLES -->
+<style>
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: #f9fafb;
+    color: #1f2937;
+}
+
+/* PAGE WRAPPER */
+.auth-page-wrapper {
+    min-height: calc(100vh - 76px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%);
+}
+
+.auth-container {
+    display: flex;
+    max-width: 1200px;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.1);
+    overflow: hidden;
+    min-height: 700px;
+}
+
+/* LEFT SIDE - VISUAL */
+.auth-visual-side {
+    flex: 1;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    padding: 60px 50px;
+    color: white;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-visual-side::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+}
+
+.visual-content {
+    position: relative;
+    z-index: 2;
+    max-width: 480px;
+}
+
+.logo-circle-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.logo-text {
+    color: white;
+    font-size: 36px;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+}
+
+.visual-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.visual-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.benefits-container {
+    margin-bottom: 40px;
+}
+
+.benefit-card {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    padding: 15px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.benefit-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.benefit-icon-circle {
+    background: rgba(255, 255, 255, 0.2);
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+    font-size: 1.3rem;
+}
+
+.benefit-content h5 {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.benefit-description {
+    opacity: 0.85;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.testimonial-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 16px;
+    border-left: 4px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.testimonial-quote {
+    font-style: italic;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.testimonial-author {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* RIGHT SIDE - FORM */
+.auth-form-side {
+    flex: 1;
+    padding: 60px 50px;
+    display: flex;
+    align-items: center;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.form-header-section {
+    margin-bottom: 35px;
+}
+
+.form-title {
+    color: #1f2937;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.form-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* FORM INPUTS */
+.form-input {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1.5px solid #e5e7eb;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.form-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    outline: none;
+}
+
+.form-hint {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 5px;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1rem;
+}
+
+.password-toggle-btn:hover {
+    color: #6366f1;
+}
+
+.password-strength-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.password-strength-bar {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+}
+
+.strength-segment {
+    height: 6px;
+    flex: 1;
+    background: #e5e7eb;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.strength-text {
+    font-size: 0.85rem;
+    min-width: 100px;
+    text-align: right;
+}
+
+.password-requirements {
+    font-size: 0.85rem;
+}
+
+/* BUTTONS */
+.submit-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    color: white;
+}
+
+/* DIVIDER */
+.divider-line {
+    display: flex;
+    align-items: center;
+    color: #9ca3af;
+}
+
+.divider-line::before,
+.divider-line::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.divider-text {
+    margin: 0 15px;
+    font-size: 0.9rem;
+}
+
+/* SOCIAL BUTTONS */
+.social-buttons {
+    margin-bottom: 20px;
+}
+
+.social-btn {
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 500;
+    border: 1.5px solid #e5e7eb;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+
+.social-btn:hover {
+    border-color: #d1d5db;
+    background-color: #f9fafb;
+    transform: translateY(-1px);
+}
+
+/* FORM CHECKBOXES */
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.2rem;
+    border: 1.5px solid #d1d5db;
+}
+
+.form-check-input:checked {
+    background-color: #6366f1;
+    border-color: #6366f1;
+}
+
+.form-check-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+}
+
+.form-check-label {
+    font-size: 0.95rem;
+    color: #4b5563;
+}
+
+/* LOGIN REDIRECT */
+.login-redirect p {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.login-redirect a {
+    color: #6366f1;
+    font-weight: 600;
+}
+
+.login-redirect a:hover {
+    text-decoration: underline;
+}
+
+/* ALERT STYLES */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 16px;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 992px) {
+    .auth-container {
+        flex-direction: column;
+        max-width: 700px;
+    }
+    
+    .auth-visual-side {
+        padding: 40px 30px;
+        text-align: center;
+    }
+    
+    .auth-form-side {
+        padding: 40px 30px;
+    }
+    
+    .visual-content {
+        max-width: 100%;
+    }
+    
+    .logo-circle-large {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .auth-page-wrapper {
+        padding: 15px;
+    }
+    
+    .auth-visual-side {
+        padding: 30px 20px;
+    }
+    
+    .auth-form-side {
+        padding: 30px 20px;
+    }
+    
+    .auth-container {
+        border-radius: 20px;
+        min-height: auto;
+    }
+    
+    .visual-title {
+        font-size: 2rem;
+    }
+    
+    .form-title {
+        font-size: 1.75rem;
+    }
+    
+    .row.g-3 {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+    
+    .row.g-3 > [class*="col-"] {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.benefit-card, .form-card {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.benefit-card:nth-child(1) { animation-delay: 0.1s; }
+.benefit-card:nth-child(2) { animation-delay: 0.2s; }
+.benefit-card:nth-child(3) { animation-delay: 0.3s; }
+</style>
+
+<!-- SCRIPT -->
+<script>
+// Password toggle visibility
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup password toggle buttons
+    const togglePassword1 = document.getElementById('togglePassword1');
+    const togglePassword2 = document.getElementById('togglePassword2');
+    const password1 = document.getElementById('password1');
+    const password2 = document.getElementById('password2');
+    
+    if (togglePassword1 && password1) {
+        togglePassword1.addEventListener('click', function() {
+            togglePasswordVisibility(password1, this);
+        });
+    }
+    
+    if (togglePassword2 && password2) {
+        togglePassword2.addEventListener('click', function() {
+            togglePasswordVisibility(password2, this);
+        });
+    }
+    
+    // Password strength indicator
+    if (password1) {
+        password1.addEventListener('input', updatePasswordStrength);
+        // Initial check
+        updatePasswordStrength();
+    }
+    
+    // Form validation feedback
+    const form = document.querySelector('.registration-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Check if passwords match
+            if (password1 && password2 && password1.value !== password2.value) {
+                e.preventDefault();
+                showPasswordMismatchError();
+            }
+        });
+    }
+});
+
+function togglePasswordVisibility(passwordField, toggleButton) {
+    const icon = toggleButton.querySelector('i');
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        toggleButton.setAttribute('aria-label', 'Hide password');
+    } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        toggleButton.setAttribute('aria-label', 'Show password');
+    }
+}
+
+function updatePasswordStrength() {
+    const password = document.getElementById('password1').value;
+    const segments = [
+        document.getElementById('segment1'),
+        document.getElementById('segment2'),
+        document.getElementById('segment3'),
+        document.getElementById('segment4')
+    ];
+    const strengthText = document.getElementById('strengthText');
+    
+    let strength = 0;
+    
+    // Check password criteria
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    // Reset all segments
+    segments.forEach(segment => {
+        segment.style.backgroundColor = '#e5e7eb';
+    });
+    
+    // Color active segments
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#16a34a'];
+    const messages = ['Very weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    
+    for (let i = 0; i < strength; i++) {
+        if (segments[i]) {
+            segments[i].style.backgroundColor = colors[strength - 1] || '#22c55e';
+        }
+    }
+    
+    // Update text
+    if (strengthText) {
+        strengthText.textContent = messages[strength] || 'Strength';
+        strengthText.style.color = colors[strength - 1] || '#22c55e';
+        strengthText.style.fontWeight = '600';
+    }
+}
+
+function showPasswordMismatchError() {
+    const password2 = document.getElementById('password2');
+    
+    // Create error element if it doesn't exist
+    let errorElement = document.querySelector('.password-mismatch-error');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.className = 'alert alert-danger alert-dismissible fade show password-mismatch-error mt-2';
+        errorElement.innerHTML = `
+            <strong>Passwords don't match!</strong> Please make sure both passwords are identical.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // Insert after password2 field
+        password2.parentNode.parentNode.appendChild(errorElement);
+    }
+    
+    // Highlight the field
+    password2.style.borderColor = '#ef4444';
+    password2.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.15)';
+    
+    // Focus on the field
+    password2.focus();
+}
+
+// Real-time password matching check
+document.getElementById('password2')?.addEventListener('input', function() {
+    const password1 = document.getElementById('password1');
+    const password2 = this;
+    
+    if (password1.value && password2.value) {
+        if (password1.value !== password2.value) {
+            password2.style.borderColor = '#ef4444';
+        } else {
+            password2.style.borderColor = '#22c55e';
+            password2.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.15)';
+            
+            // Remove error message if it exists
+            const errorElement = document.querySelector('.password-mismatch-error');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

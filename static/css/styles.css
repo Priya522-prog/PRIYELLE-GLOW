@@ -1,0 +1,17 @@
+:root {
+  --primary:#FF4F5A;
+  --secondary:#6A4C93;
+  --accent:#2EC4B6;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background:#FAFAFA;
+}
+
+button {
+  background: var(--primary);
+  color:white;
+  border:none;
+  padding:10px;
+}
