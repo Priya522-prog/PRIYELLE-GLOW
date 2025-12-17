@@ -111,11 +111,7 @@ canvas {
 
 
 <!-- SCRIPT -->
-<!-- Replace your entire SCRIPT section with this: -->
-<script>
-// Simple variables
-let capturedImageData = null;
-
+<
 // Start camera when page loads
 window.onload = function() {
     startCamera();
@@ -154,6 +150,12 @@ function captureImage() {
     
     // Create a temporary canvas to capture image
     const tempCanvas = document.createElement('canvas');
+
+        if (!video.videoWidth || !video.videoHeight) {
+            alert('Camera not ready yet. Please wait a moment and try again.');
+            return;
+        }
+    }
     tempCanvas.width = video.videoWidth;
     tempCanvas.height = video.videoHeight;
     const ctx = tempCanvas.getContext('2d');
@@ -165,52 +167,109 @@ function captureImage() {
     capturedImageData = tempCanvas.toDataURL('image/jpeg', 0.8);
     
     // Save to hidden input
-    imageInput.value = capturedImageData;
-    
-    // Show on screen canvas and hide video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    
-    canvas.style.display = 'block';
-    video.style.display = 'none';
-    
-    // Stop camera
-    const stream = video.srcObject;
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-    
-    // Visual feedback
-    const captureBtn = document.querySelector('.btn-outline-primary');
-    captureBtn.textContent = '✅ Image Captured!';
-    captureBtn.className = 'btn btn-success w-100 mb-3 rounded-pill';
-    
-    console.log("Image captured successfully!");
-}
+    <!-- SCRIPT -->
+    <script>
+    // Start camera when page loads
+    window.onload = function() {
+        startCamera();
+    };
 
-// Analyze - SUPER SIMPLE
-function submitAnalysis() {
-    console.log("Submitting analysis...");
-    
-    const imageInput = document.getElementById('captured_image');
-    
-    if (!imageInput.value || imageInput.value.length < 100) {
-        alert("❌ Please capture an image first!");
-        return false;
-    }
-    
-    // Show loading
-    const loading = document.getElementById('loadingOverlay');
-    if (loading) {
-        loading.style.display = 'block';
-    }
-    
-    // Submit the form
-    document.getElementById('analysisForm').submit();
-    
-    return true;
-}
-</script>
+    function startCamera() {
+        const video = document.getElementById('video');
 
-{% endblock %}
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch(function(err) {
+                    console.error("Camera error:", err);
+                    alert("Cannot access camera. Please allow camera permissions.");
+                });
+        } else {
+            alert("Your browser doesn't support camera access.");
+        }
+    }
+
+    // Capture Image - SIMPLE AND RELIABLE
+    let capturedImageData = null;
+    function captureImage() {
+        console.log("Trying to capture image...");
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const imageInput = document.getElementById('captured_image');
+
+        if (!video || !canvas) {
+            alert("Camera not ready. Please refresh page.");
+            return;
+        }
+
+        if (!video.videoWidth || !video.videoHeight) {
+            alert('Camera not ready yet. Please wait a moment and try again.');
+            return;
+        }
+
+        // Create a temporary canvas to capture image
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth;
+        tempCanvas.height = video.videoHeight;
+        const ctx = tempCanvas.getContext('2d');
+
+        // Draw video frame to canvas
+        ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+
+        // Convert to base64
+        capturedImageData = tempCanvas.toDataURL('image/jpeg', 0.8);
+
+        // Save to hidden input
+        if (imageInput) imageInput.value = capturedImageData;
+
+        // Show on screen canvas and hide video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        canvas.style.display = 'block';
+        video.style.display = 'none';
+
+        // Stop camera
+        const stream = video.srcObject;
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        // Visual feedback
+        const captureBtn = document.querySelector('.btn-outline-primary');
+        if (captureBtn) {
+            captureBtn.textContent = '✅ Image Captured!';
+            captureBtn.className = 'btn btn-success w-100 mb-3 rounded-pill';
+        }
+
+        console.log("Image captured successfully!");
+    }
+
+    // Analyze - SUPER SIMPLE
+    function submitAnalysis() {
+        console.log("Submitting analysis...");
+
+        const imageInput = document.getElementById('captured_image');
+
+        if (!imageInput || !imageInput.value || imageInput.value.length < 100) {
+            alert("❌ Please capture an image first!");
+            return false;
+        }
+
+        // Show loading
+        const loading = document.getElementById('loadingOverlay');
+        if (loading) {
+            loading.style.display = 'block';
+        }
+
+        // Submit the form
+        document.getElementById('analysisForm').submit();
+
+        return true;
+    }
+    </script>

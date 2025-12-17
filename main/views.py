@@ -15,38 +15,11 @@ from .mpesa import stk_push
 # Authentication
 def register(request):
     if request.method == "POST":
-        username = request.POST.get('username')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        email = request.POST.get('email', '')
-        first_name = request.POST.get('first_name', '')
-        last_name = request.POST.get('last_name', '')
-
-        # Basic validation
-        if not username or not password1:
-            messages.error(request, "Username and password are required.")
-            return render(request, 'register.html')
-
-        if password1 != password2:
-            messages.error(request, "Passwords do not match.")
-            return render(request, 'register.html')
-
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already taken.")
-            return render(request, 'register.html')
-
-        # Create the user
         User.objects.create_user(
-            username=username,
-            password=password1,
-            email=email,
-            first_name=first_name,
-            last_name=last_name
+            username=request.POST['username'],
+            password=request.POST['password']
         )
-        messages.success(request, "Account created successfully. Please log in.")
         return redirect('login')
-
     return render(request, 'register.html')
 
 
@@ -65,6 +38,44 @@ def login_view(request):
 
 @login_required
 def dashboard(request):
+    # If dashboard form posts an image, handle it (supports dashboard camera flow)
+    if request.method == 'POST':
+        image_data = request.POST.get('captured_image')
+        if not image_data:
+            messages.error(request, 'No image submitted. Please capture an image and try again.')
+            analyses = SkinAnalysis.objects.filter(user=request.user)
+            return render(request, 'dashboard.html', {'analyses': analyses})
+
+        try:
+            format, imgstr = image_data.split(';base64,')
+            image = ContentFile(base64.b64decode(imgstr), name='analysis.png')
+
+            analysis = SkinAnalysis.objects.create(
+                user=request.user,
+                image=image,
+                skin_type='normal',
+                concerns=''
+            )
+
+            result = analyze_image(analysis.image.path)
+
+            analysis.skin_type = result.get('skin_type', 'normal')
+            analysis.concerns = result.get('concerns', '')
+            analysis.skincare_recommendation = ', '.join(result.get('skincare', []))
+            analysis.makeup_recommendation = ', '.join(result.get('makeup', []))
+            analysis.save()
+
+            skin_type = result.get('skin_type', 'normal')
+            concerns = result.get('concerns', '')
+
+            messages.success(request, f"Your skin appears to be {skin_type}.")
+
+            return redirect('analysis_results', analysis_id=analysis.id)
+        except Exception as e:
+            messages.error(request, 'Failed to process the image. Please try again with better lighting.')
+            analyses = SkinAnalysis.objects.filter(user=request.user)
+            return render(request, 'dashboard.html', {'analyses': analyses})
+
     analyses = SkinAnalysis.objects.filter(user=request.user)
     return render(request, 'dashboard.html', {'analyses': analyses})
 
