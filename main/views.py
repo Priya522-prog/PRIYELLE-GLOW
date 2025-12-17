@@ -15,11 +15,38 @@ from .mpesa import stk_push
 # Authentication
 def register(request):
     if request.method == "POST":
+        username = request.POST.get('username')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        email = request.POST.get('email', '')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+
+        # Basic validation
+        if not username or not password1:
+            messages.error(request, "Username and password are required.")
+            return render(request, 'register.html')
+
+        if password1 != password2:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'register.html')
+
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken.")
+            return render(request, 'register.html')
+
+        # Create the user
         User.objects.create_user(
-            username=request.POST['username'],
-            password=request.POST['password']
+            username=username,
+            password=password1,
+            email=email,
+            first_name=first_name,
+            last_name=last_name
         )
+        messages.success(request, "Account created successfully. Please log in.")
         return redirect('login')
+
     return render(request, 'register.html')
 
 
@@ -135,7 +162,7 @@ def analyze(request):
 
                 messages.success(
                     request,
-                    f"Your skin appears to be {skin_type.lower()} with {concerns_text}. {recommendation}"
+                    f"Your skin appears to be {skin_type.title()} with {concerns_text}. {recommendation}"
                 )
 
             # Redirect to results page
