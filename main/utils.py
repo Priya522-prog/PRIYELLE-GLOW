@@ -156,7 +156,7 @@ def analyze_image(image_path):
         recs = recommendations.get(skin_type, recommendations['normal'])
         
         return {
-            "skin_type": skin_type.title(),
+            "skin_type": skin_type,  # return lowercase to match Product SKIN_TYPE_CHOICES
             "concerns": concerns_text,
             "skincare": recs['skincare'],
             "makeup": recs['makeup']
@@ -166,7 +166,7 @@ def analyze_image(image_path):
         # Fallback to default if analysis fails
         print(f"Image analysis error: {e}")
         return {
-            "skin_type": random.choice(['Oily', 'Dry', 'Combination', 'Normal']),
+            "skin_type": random.choice(['oily', 'dry', 'combination', 'normal']),
             "concerns": "Unable to analyze - please try again with better lighting",
             "skincare": [
                 "Gentle cleanser",
