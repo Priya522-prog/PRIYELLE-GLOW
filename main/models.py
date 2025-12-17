@@ -10,10 +10,21 @@ class Product(models.Model):
         ('makeup', 'Makeup'),
     ]
 
+    SKIN_TYPE_CHOICES = [
+        ('oily', 'Oily'),
+        ('dry', 'Dry'),
+        ('combination', 'Combination'),
+        ('normal', 'Normal'),
+        ('sensitive', 'Sensitive'),
+    ]
+
     name = models.CharField(max_length=200)
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    skin_type = models.CharField(max_length=20, choices=SKIN_TYPE_CHOICES, default='normal')
+    country = models.CharField(max_length=100, default='Kenya')
+    image = models.ImageField(upload_to='products/', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -30,9 +41,10 @@ class SkinAnalysis(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='analysis/')
-    skin_type = models.CharField(max_length=20, choices=SKIN_TYPES)
-    skincare_recommendation = models.TextField()
-    makeup_recommendation = models.TextField()
+    skin_type = models.CharField(max_length=20, choices=SKIN_TYPES, default='normal')
+    concerns = models.TextField(blank=True)
+    skincare_recommendation = models.TextField(blank=True)
+    makeup_recommendation = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 

@@ -89,36 +89,43 @@ def analyze(request):
 
             analysis = SkinAnalysis.objects.create(
                 user=request.user,
-                image=image
+                image=image,
+                skin_type='normal',
+                concerns=''
             )
 
             result = analyze_image(analysis.image.path)
 
             analysis.skin_type = result["skin_type"]
-            analysis.concerns = result["concerns"]
+            analysis.concerns = result.get("concerns", "")
+            analysis.skincare_recommendation = ", ".join(result.get("skincare", []))
+            analysis.makeup_recommendation = ", ".join(result.get("makeup", []))
             analysis.save()
 
-            # ---------- FEEDBACK GENERATION (ADDED) ----------
-            skin_type = result.get("skin_type")
-            concerns = result.get("concerns", [])
+            # Show success message with feedback
+            skin_type = result.get("skin_type", "normal")
+            concerns = result.get("concerns", "")
 
             if not skin_type:
                 messages.error(
                     request,
                     "Face not clearly detected. Please ensure good lighting and face the camera."
                 )
+                return render(request, "analyze.html")
             else:
                 # Build readable concerns text
                 if concerns:
-                    concerns_text = ", ".join(concerns)
+                    concerns_text = concerns if isinstance(concerns, str) else ", ".join(concerns)
                 else:
                     concerns_text = "no major skin issues"
 
-                # Recommendation summary (simple & extendable)
+                # Recommendation summary
                 recommendations = {
                     "Oily": "Use oil-free cleansers and lightweight moisturizers.",
                     "Dry": "Use gentle cleansers and rich hydrating moisturizers.",
-                    "Combination": "Use balanced skincare and target oily and dry areas separately."
+                    "Combination": "Use balanced skincare and target oily and dry areas separately.",
+                    "Normal": "Maintain a consistent skincare routine.",
+                    "Sensitive": "Use hypoallergenic and gentle skincare products."
                 }
 
                 recommendation = recommendations.get(
@@ -130,16 +137,38 @@ def analyze(request):
                     request,
                     f"Your skin appears to be {skin_type.lower()} with {concerns_text}. {recommendation}"
                 )
-            # ========== END FEEDBACK SYSTEM ==========
 
-            products = Product.objects.filter(
-                skin_type=analysis.skin_type
-            )           
-
-            return render(request, "analyze.html", {
-                "analysis": analysis,
-                "products": products
-            })
+            # Redirect to results page
+            return redirect('analysis_results', analysis_id=analysis.id)
 
     return render(request, "analyze.html")   
+
+@login_required
+def analysis_results(request, analysis_id):
+    analysis = get_object_or_404(SkinAnalysis, id=analysis_id, user=request.user)
+
+    # Filter products by skin type and category
+    skincare_products = Product.objects.filter(
+        skin_type=analysis.skin_type,
+        category='skincare'
+    ).order_by('country')
+    
+    makeup_products = Product.objects.filter(
+        skin_type=analysis.skin_type,
+        category='makeup'
+    ).order_by('country')
+
+    feedback_message = (
+        f"Your skin appears to be {analysis.skin_type}. "
+        f"Detected concerns: {analysis.concerns}. "
+        f"Follow the recommended products below."
+    )
+
+    return render(request, 'analysis_result.html', {
+        'analysis': analysis,
+        'skincare_products': skincare_products,
+        'makeup_products': makeup_products,
+        'feedback_message': feedback_message
+    })
+
 

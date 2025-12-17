@@ -1,12 +1,155 @@
 {% extends 'base.html' %}
-{% block content %}
-<h2>Skin Analysis</h2>
-<video id="video" autoplay></video>
-<form method="post" enctype="multipart/form-data">
-{% csrf_token %}
-<input type="file" name="image">
-<button>Analyze</button>
-</form>
 {% load static %}
-<script src="{% static 'js/camera.js' %}"></script>
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Skin Analysis</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Camera Stream -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Camera Feed</h5>
+                </div>
+                <div class="card-body">
+                    <video id="video" autoplay playsinline style="width: 100%; max-width: 500px; border: 1px solid #ddd; border-radius: 8px;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+            </div>
+
+            <!-- Capture & Analyze Buttons -->
+            <div class="card">
+                <div class="card-body">
+                    <button id="captureBtn" class="btn btn-primary btn-lg" style="width: 100%; margin-bottom: 10px;">
+                        📸 Capture Image
+                    </button>
+                    <button id="analyzeBtn" class="btn btn-success btn-lg" style="width: 100%; display: none;">
+                        ✓ Analyze My Skin
+                    </button>
+                    <button id="resetBtn" class="btn btn-secondary btn-lg" style="width: 100%; display: none;">
+                        🔄 Retake
+                    </button>
+                    <div id="uploadPreview" style="margin-top: 10px; display: none;">
+                        <img id="previewImg" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Analyses -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Your Recent Analyses</h5>
+                </div>
+                <div class="card-body">
+                    {% if request.user.skinanalysis_set.all %}
+                        <ul class="list-group">
+                            {% for analysis in request.user.skinanalysis_set.all %}
+                                <li class="list-group-item">
+                                    <strong>{{ analysis.skin_type }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ analysis.created_at|date:"M d, Y" }}</small>
+                                    <br>
+                                    <a href="{% url 'analysis_results' analysis.id %}" class="btn btn-sm btn-info mt-2">
+                                        View Results
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No analyses yet. Capture an image to start!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for submitting analysis -->
+<form id="analyzeForm" method="post" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" id="capturedImageInput" name="captured_image">
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const previewDiv = document.getElementById('uploadPreview');
+    const previewImg = document.getElementById('previewImg');
+    const analyzeForm = document.getElementById('analyzeForm');
+    const capturedImageInput = document.getElementById('capturedImageInput');
+
+    let capturedImageData = null;
+
+    // Initialize camera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error('Error accessing camera:', err);
+            alert('Unable to access camera. Please check permissions.');
+        });
+
+    // Capture image from camera
+    captureBtn.addEventListener('click', function() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        capturedImageData = canvas.toDataURL('image/png');
+        previewImg.src = capturedImageData;
+        previewDiv.style.display = 'block';
+        
+        video.style.display = 'none';
+        captureBtn.style.display = 'none';
+        analyzeBtn.style.display = 'block';
+        resetBtn.style.display = 'block';
+    });
+
+    // Analyze captured image
+    analyzeBtn.addEventListener('click', function() {
+        capturedImageInput.value = capturedImageData;
+        analyzeForm.submit();
+    });
+
+    // Reset to retake
+    resetBtn.addEventListener('click', function() {
+        previewDiv.style.display = 'none';
+        video.style.display = 'block';
+        captureBtn.style.display = 'block';
+        analyzeBtn.style.display = 'none';
+        resetBtn.style.display = 'none';
+        capturedImageData = null;
+    });
+});
+</script>
+
+<style>
+    .container {
+        max-width: 1200px;
+    }
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn {
+        font-weight: 500;
+    }
+</style>
 {% endblock %}

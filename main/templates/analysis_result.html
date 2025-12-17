@@ -1,7 +1,179 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<h2>Results</h2>
-<p>Skin: {{ analysis.skin_type }}</p>
-<p>Skincare: {{ analysis.skincare_advice }}</p>
-<p>Makeup: {{ analysis.makeup_advice }}</p>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Analysis Results</h2>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Feedback Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h4>{{ feedback_message }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Details -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Analysis Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Skin Type:</strong> <span class="badge bg-primary">{{ analysis.skin_type|title }}</span></p>
+                    <p><strong>Concerns:</strong> {{ analysis.concerns|default:"No major concerns" }}</p>
+                    <p><strong>Analysis Date:</strong> {{ analysis.created_at|date:"M d, Y \a\t g:i A" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Captured Image</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if analysis.image %}
+                        <img src="{{ analysis.image.url }}" alt="Analysis Image" style="max-width: 100%; max-height: 300px; border-radius: 8px;">
+                    {% else %}
+                        <p class="text-muted">No image available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Skincare Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    {{ analysis.skincare_recommendation|default:"No specific recommendations" }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Makeup Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    {{ analysis.makeup_recommendation|default:"No specific recommendations" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommended Products -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Recommended Products for {{ analysis.skin_type|title }} Skin</h3>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Skincare Products -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h4>💧 Skincare Products</h4>
+            {% if skincare_products %}
+                <div class="row">
+                    {% for product in skincare_products %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top" style="height: 200px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                        <span class="text-muted">No Image</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text">{{ product.description }}</p>
+                                    <p><strong>Country:</strong> {{ product.country }}</p>
+                                    <p><strong>Price:</strong> <span class="text-success">KES {{ product.price }}</span></p>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-primary btn-sm w-100" onclick="alert('Add to cart: {{ product.name }}')">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No skincare products available for your skin type.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Makeup Products -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h4>💄 Makeup Products</h4>
+            {% if makeup_products %}
+                <div class="row">
+                    {% for product in makeup_products %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top" style="height: 200px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                        <span class="text-muted">No Image</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text">{{ product.description }}</p>
+                                    <p><strong>Country:</strong> {{ product.country }}</p>
+                                    <p><strong>Price:</strong> <span class="text-success">KES {{ product.price }}</span></p>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-primary btn-sm w-100" onclick="alert('Add to cart: {{ product.name }}')">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No makeup products available for your skin type.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4 mb-4">
+        <div class="col-md-12">
+            <a href="{% url 'analyze' %}" class="btn btn-primary">New Analysis</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+    }
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+    }
+</style>
 {% endblock %}
+
