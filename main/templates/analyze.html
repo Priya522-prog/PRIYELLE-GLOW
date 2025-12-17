@@ -96,16 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let capturedImageData = null;
 
-    // Initialize camera and disable capture button until ready
-    captureBtn.disabled = true;
+    // Initialize camera
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
         .then(stream => {
             video.srcObject = stream;
-            // enable capture once video can play
-            video.addEventListener('canplay', function onCanPlay() {
-                captureBtn.disabled = false;
-                video.removeEventListener('canplay', onCanPlay);
-            });
         })
         .catch(err => {
             console.error('Error accessing camera:', err);
@@ -114,27 +108,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Capture image from camera
     captureBtn.addEventListener('click', function() {
-        // ensure video has dimensions
-        if (!video.videoWidth || !video.videoHeight) {
-            alert('Camera not ready yet. Please wait a moment and try again.');
-            return;
-        }
-
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
         
         capturedImageData = canvas.toDataURL('image/png');
-        if (!capturedImageData) {
-            alert('Failed to capture image. Please try again.');
-            return;
-        }
-
-        // store captured data in hidden input for reliability
-        capturedImageInput.value = capturedImageData;
-        console.log('Captured image length:', capturedImageData.length);
-
         previewImg.src = capturedImageData;
         previewDiv.style.display = 'block';
         
@@ -146,15 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Analyze captured image
     analyzeBtn.addEventListener('click', function() {
-        // prefer the hidden input (works even if capturedImageData variable is lost)
-        const payload = capturedImageInput.value || previewImg.src || capturedImageData;
-        if (!payload) {
-            console.error('Attempted to analyze without image', {capturedImageData, previewImgSrc: previewImg.src, hiddenValue: capturedImageInput.value});
-            alert('No image captured. Please capture an image first.');
-            return;
-        }
-        console.log('Submitting analysis payload length:', payload.length);
-        capturedImageInput.value = payload;
+        capturedImageInput.value = capturedImageData;
         analyzeForm.submit();
     });
 
@@ -166,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeBtn.style.display = 'none';
         resetBtn.style.display = 'none';
         capturedImageData = null;
-        capturedImageInput.value = '';
     });
 });
 </script>
