@@ -121,11 +121,11 @@ def analyze(request):
 
                 # Recommendation summary
                 recommendations = {
-                    "Oily": "Use oil-free cleansers and lightweight moisturizers.",
-                    "Dry": "Use gentle cleansers and rich hydrating moisturizers.",
-                    "Combination": "Use balanced skincare and target oily and dry areas separately.",
-                    "Normal": "Maintain a consistent skincare routine.",
-                    "Sensitive": "Use hypoallergenic and gentle skincare products."
+                    "oily": "Use oil-free cleansers and lightweight moisturizers.",
+                    "dry": "Use gentle cleansers and rich hydrating moisturizers.",
+                    "combination": "Use balanced skincare and target oily and dry areas separately.",
+                    "normal": "Maintain a consistent skincare routine.",
+                    "sensitive": "Use hypoallergenic and gentle skincare products."
                 }
 
                 recommendation = recommendations.get(
