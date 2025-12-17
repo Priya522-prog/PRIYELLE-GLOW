@@ -5,15 +5,25 @@
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-3">
-    <a class="navbar-brand fw-bold text-primary" href="/">
-        <i class="fas fa-sparkles me-2"></i>Priyelle Glow
-    </a>
-    <div class="ms-auto">
-        <a href="{% url 'login' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-            <i class="fas fa-sign-in-alt me-1"></i> Login
-        </a>
+
+  <div class="container-fluid">
+
+    <!-- Left / Center links -->
+    <div class="collapse navbar-collapse justify-content-center">
+      
     </div>
+
+    <!-- Right login -->
+    <div class="ms-auto">
+      <a href="{% url 'login' %}" class="btn glow-login-btn">
+        Login
+      </a>
+    </div>
+
+  </div>
 </nav>
+
+
 
 <!-- PAGE WRAPPER -->
 <div class="auth-page-wrapper">

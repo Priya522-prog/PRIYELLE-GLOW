@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 import base64
 from django.core.files.base import ContentFile
 
+from django.contrib import messages
 
 from .models import Product, SkinAnalysis
 from .forms import ProductForm, ImageUploadForm
@@ -41,24 +42,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'analyses': analyses})
 
 
-# skin Analysis
-@login_required
-def analyze(request):
-    if request.method == "POST":
-        form = ImageUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            analysis_data = analyze_image(request.FILES['image'])
-            SkinAnalysis.objects.create(
-                user=request.user,
-                image=request.FILES['image'],
-                skin_type=analysis_data['skin_type'],
-                skincare_advice=analysis_data['skincare'],
-                makeup_advice=analysis_data['makeup']
-            )
-            return redirect('dashboard')
-    else:
-        form = ImageUploadForm()
-    return render(request, 'analyze.html', {'form': form})
+
 
 
 # Product(STAFF ONLY)
@@ -114,13 +98,48 @@ def analyze(request):
             analysis.concerns = result["concerns"]
             analysis.save()
 
+            # ---------- FEEDBACK GENERATION (ADDED) ----------
+            skin_type = result.get("skin_type")
+            concerns = result.get("concerns", [])
+
+            if not skin_type:
+                messages.error(
+                    request,
+                    "Face not clearly detected. Please ensure good lighting and face the camera."
+                )
+            else:
+                # Build readable concerns text
+                if concerns:
+                    concerns_text = ", ".join(concerns)
+                else:
+                    concerns_text = "no major skin issues"
+
+                # Recommendation summary (simple & extendable)
+                recommendations = {
+                    "Oily": "Use oil-free cleansers and lightweight moisturizers.",
+                    "Dry": "Use gentle cleansers and rich hydrating moisturizers.",
+                    "Combination": "Use balanced skincare and target oily and dry areas separately."
+                }
+
+                recommendation = recommendations.get(
+                    skin_type,
+                    "Maintain a consistent skincare routine."
+                )
+
+                messages.success(
+                    request,
+                    f"Your skin appears to be {skin_type.lower()} with {concerns_text}. {recommendation}"
+                )
+            # ========== END FEEDBACK SYSTEM ==========
+
             products = Product.objects.filter(
                 skin_type=analysis.skin_type
-            )
+            )           
 
-            return render(request, "analyze", {
+            return render(request, "analyze.html", {
                 "analysis": analysis,
                 "products": products
             })
 
-    return render(request, "analyze.html")
+    return render(request, "analyze.html")   
+

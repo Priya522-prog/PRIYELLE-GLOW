@@ -1,18 +1,30 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Priyelle Glow</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2">
 </head>
+
 <body>
-<nav>
-  <a href="/">Home</a>
-  {% if user.is_authenticated %}
-    <a href="/dashboard/">Dashboard</a>
-  {% endif %}
+
+  <nav class="main-nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">Priyelle Glow</a>
+
+    <a href="/">Home</a>
+
+    {% if user.is_authenticated %}
+      <a href="/dashboard/">Dashboard</a>
+    {% endif %}
+  </div>
 </nav>
 
 {% block content %}{% endblock %}
+
 </body>
 </html>
+
+
