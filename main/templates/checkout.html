@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Checkout</h2>
+    {% if order and items %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card p-4">
+                <h4>Order Summary</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for it in items %}
+                        <tr>
+                            <td>{{ it.product.name }}</td>
+                            <td>KES {{ it.product.price }}</td>
+                            <td>{{ it.quantity }}</td>
+                            <td>KES {{ it.product.price|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4 bg-light">
+                <h5>Total: <strong>KES {{ total }}</strong></h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg w-100 mt-3">Confirm Payment (Simulated)</button>
+                </form>
+                <a href="{% url 'view_cart' %}" class="btn btn-secondary w-100 mt-2">Back to Cart</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-muted">No items to checkout.</p>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    {% endif %}
+</div>
+{% endblock %}

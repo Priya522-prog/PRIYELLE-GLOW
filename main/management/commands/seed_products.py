@@ -48,7 +48,7 @@ class Command(BaseCommand):
         
         # Create products
         created_count = 0
-        for product_data in products_data:
+        for idx, product_data in enumerate(products_data):
             product, created = Product.objects.get_or_create(
                 name=product_data['name'],
                 defaults={
@@ -56,7 +56,8 @@ class Command(BaseCommand):
                     'price': product_data['price'],
                     'category': product_data['category'],
                     'skin_type': product_data['skin_type'],
-                    'country': product_data['country']
+                    'country': product_data['country'],
+                    'image': f'products/product_{idx}.jpg'  # Placeholder image path
                 }
             )
             if created:

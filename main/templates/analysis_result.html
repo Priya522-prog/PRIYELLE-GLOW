@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static tz %}
 
 {% block content %}
 <div class="container mt-4">
@@ -29,7 +29,7 @@
                 <div class="card-body">
                     <p><strong>Skin Type:</strong> <span class="badge bg-primary">{{ analysis.skin_type|title }}</span></p>
                     <p><strong>Concerns:</strong> {{ analysis.concerns|default:"No major concerns" }}</p>
-                    <p><strong>Analysis Date:</strong> {{ analysis.created_at|date:"M d, Y \a\t g:i A" }}</p>
+                    <p><strong>Analysis Date:</strong> {{ analysis.created_at|localtime|date:"M d, Y H:i" }}</p>
                 </div>
             </div>
         </div>
@@ -93,9 +93,7 @@
                                 {% if product.image %}
                                     <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
                                 {% else %}
-                                    <div class="card-img-top" style="height: 200px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                                        <span class="text-muted">No Image</span>
-                                    </div>
+                                    <img src="{% static 'img/product-placeholder.svg' %}" class="card-img-top" alt="No image" style="height:200px; object-fit:cover;">
                                 {% endif %}
                                 <div class="card-body">
                                     <h5 class="card-title">{{ product.name }}</h5>
@@ -104,7 +102,7 @@
                                     <p><strong>Price:</strong> <span class="text-success">KES {{ product.price }}</span></p>
                                 </div>
                                 <div class="card-footer">
-                                    <button class="btn btn-primary btn-sm w-100" onclick="alert('Add to cart: {{ product.name }}')">Add to Cart</button>
+                                    <form method="post" action="{% url 'add_to_cart' product.id %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button type="submit" class="btn btn-primary btn-sm w-100">Add to Cart</button></form>
                                 </div>
                             </div>
                         </div>
@@ -128,11 +126,9 @@
                         <div class="col-md-4 mb-3">
                             <div class="card h-100">
                                 {% if product.image %}
-                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;" onerror="this.src='{% static 'img/product-placeholder.svg' %}'">
                                 {% else %}
-                                    <div class="card-img-top" style="height: 200px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                                        <span class="text-muted">No Image</span>
-                                    </div>
+                                    <img src="{% static 'img/product-placeholder.svg' %}" class="card-img-top" alt="No image" style="height:200px; object-fit:cover;">
                                 {% endif %}
                                 <div class="card-body">
                                     <h5 class="card-title">{{ product.name }}</h5>
@@ -141,7 +137,7 @@
                                     <p><strong>Price:</strong> <span class="text-success">KES {{ product.price }}</span></p>
                                 </div>
                                 <div class="card-footer">
-                                    <button class="btn btn-primary btn-sm w-100" onclick="alert('Add to cart: {{ product.name }}')">Add to Cart</button>
+                                    <form method="post" action="{% url 'add_to_cart' product.id %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button type="submit" class="btn btn-primary btn-sm w-100">Add to Cart</button></form>
                                 </div>
                             </div>
                         </div>

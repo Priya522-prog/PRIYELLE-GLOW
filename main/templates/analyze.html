@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static tz %}
 
 {% block content %}
 <div class="container mt-4">
@@ -22,8 +22,10 @@
                     <h5>Camera Feed</h5>
                 </div>
                 <div class="card-body">
-                    <video id="video" autoplay playsinline style="width: 100%; max-width: 500px; border: 1px solid #ddd; border-radius: 8px;"></video>
-                    <canvas id="canvas" style="display: none;"></canvas>
+                    <div class="camera-wrap d-flex justify-content-center">
+                        <video id="video" autoplay playsinline></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -39,8 +41,8 @@
                     <button id="resetBtn" class="btn btn-secondary btn-lg" style="width: 100%; display: none;">
                         🔄 Retake
                     </button>
-                    <div id="uploadPreview" style="margin-top: 10px; display: none;">
-                        <img id="previewImg" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                    <div id="uploadPreview" style="margin-top: 10px; display: none; text-align:center;">
+                        <img id="previewImg" alt="Capture preview">
                     </div>
                 </div>
             </div>
@@ -53,23 +55,30 @@
                     <h5>Your Recent Analyses</h5>
                 </div>
                 <div class="card-body">
-                    {% if request.user.skinanalysis_set.all %}
-                        <ul class="list-group">
-                            {% for analysis in request.user.skinanalysis_set.all %}
-                                <li class="list-group-item">
-                                    <strong>{{ analysis.skin_type }}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ analysis.created_at|date:"M d, Y" }}</small>
-                                    <br>
-                                    <a href="{% url 'analysis_results' analysis.id %}" class="btn btn-sm btn-info mt-2">
-                                        View Results
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No analyses yet. Capture an image to start!</p>
-                    {% endif %}
+                    {% with analyses=request.user.skinanalysis_set.all %}
+                        {% if analyses %}
+                            <ul class="list-group">
+                                {% for analysis in analyses %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong class="text-capitalize">{{ analysis.skin_type }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ analysis.created_at|localtime|date:"M d, Y H:i" }}</small>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'analysis_results' analysis.id %}" class="btn btn-sm btn-info me-2">View</a>
+                                            <form method="post" action="{% url 'delete_analysis' analysis.id %}" style="display:inline-block;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No analyses yet. Capture an image to start!</p>
+                        {% endif %}
+                    {% endwith %}
                 </div>
             </div>
         </div>
@@ -150,6 +159,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     .btn {
         font-weight: 500;
+    }
+    .camera-wrap {
+        width: 320px;
+        height: 320px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        background: #f8f9fa;
+    }
+    .camera-wrap video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    #previewImg {
+        width: 320px;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        display: inline-block;
+    }
+    @media (max-width: 576px) {
+        .camera-wrap, #previewImg { width: 220px; height: 220px; }
     }
 </style>
 {% endblock %}

@@ -6,8 +6,9 @@ import base64
 from django.core.files.base import ContentFile
 
 from django.contrib import messages
+from django.urls import reverse
 
-from .models import Product, SkinAnalysis
+from .models import Product, SkinAnalysis, Order, OrderItem
 from .forms import ProductForm, ImageUploadForm
 from .utils import analyze_image
 from .mpesa import stk_push
@@ -135,7 +136,7 @@ def analyze(request):
 
                 messages.success(
                     request,
-                    f"Your skin appears to be {skin_type.lower()} with {concerns_text}. {recommendation}"
+                    f"Your skin appears to be {skin_type.title()} with {concerns_text}. {recommendation}"
                 )
 
             # Redirect to results page
@@ -172,3 +173,100 @@ def analysis_results(request, analysis_id):
     })
 
 
+@login_required
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    # Get or create an open order for the user
+    order, created = Order.objects.get_or_create(user=request.user, paid=False, defaults={'total_price': 0})
+
+    # Try to find existing item
+    item, item_created = OrderItem.objects.get_or_create(order=order, product=product, defaults={'quantity': 1})
+    if not item_created:
+        item.quantity += 1
+        item.save()
+
+    messages.success(request, f"Added {product.name} to cart.")
+
+    # Always redirect to cart to show visible feedback
+    return redirect('view_cart')
+
+
+@login_required
+def view_cart(request):
+    order = Order.objects.filter(user=request.user, paid=False).first()
+    items = order.items.select_related('product') if order else []
+
+    total = 0
+    for it in items:
+        total += (it.product.price * it.quantity)
+
+    return render(request, 'cart.html', {'order': order, 'items': items, 'total': total})
+
+
+@login_required
+def checkout(request):
+    order = Order.objects.filter(user=request.user, paid=False).first()
+    if not order:
+        messages.error(request, 'No items in cart to checkout.')
+        return redirect('view_cart')
+
+    if request.method == 'POST':
+        # Simulate payment: mark as paid and set total
+        total = 0
+        for it in order.items.select_related('product'):
+            total += (it.product.price * it.quantity)
+
+        order.total_price = total
+        order.paid = True
+        order.save()
+
+        messages.success(request, f'Payment simulated. Order total KSh {total} marked as paid.')
+        return redirect('order_success')
+
+    # show confirmation page
+    items = order.items.select_related('product')
+    total = sum(it.product.price * it.quantity for it in items)
+    return render(request, 'checkout.html', {'order': order, 'items': items, 'total': total})
+
+
+@login_required
+def order_success(request):
+    # Show last paid order
+    order = Order.objects.filter(user=request.user, paid=True).latest('id')
+    items = order.items.select_related('product')
+    total = order.total_price
+    return render(request, 'order_success.html', {'order': order, 'items': items, 'total': total})
+
+
+@login_required
+def remove_from_cart(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+    product_name = item.product.name
+    item.delete()
+    messages.success(request, f"Removed {product_name} from cart.")
+    return redirect('view_cart')
+
+
+@login_required
+def update_cart_qty(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+    action = request.POST.get('action')
+    
+    if action == 'increase':
+        item.quantity += 1
+    elif action == 'decrease' and item.quantity > 1:
+        item.quantity -= 1
+    
+    item.save()
+    return redirect('view_cart')
+
+@login_required
+def delete_analysis(request, analysis_id):
+    analysis = get_object_or_404(SkinAnalysis, id=analysis_id, user=request.user)
+    if request.method == 'POST':
+        analysis.delete()
+        messages.success(request, 'Analysis deleted.')
+        return redirect('analyze')
+    # If not POST, just redirect back to analyze page
+    return redirect('analyze')

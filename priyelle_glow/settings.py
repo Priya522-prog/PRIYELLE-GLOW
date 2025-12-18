@@ -6,6 +6,10 @@ SECRET_KEY = 'django-insecure-priyelle-glow'
 DEBUG = True
 ALLOWED_HOSTS = []
 
+# Timezone settings
+TIME_ZONE = 'Africa/Nairobi'
+USE_TZ = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,6 +57,7 @@ DATABASES = {
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
