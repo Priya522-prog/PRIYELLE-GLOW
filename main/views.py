@@ -39,6 +39,44 @@ def login_view(request):
 
 @login_required
 def dashboard(request):
+    # If dashboard form posts an image, handle it (supports dashboard camera flow)
+    if request.method == 'POST':
+        image_data = request.POST.get('captured_image')
+        if not image_data:
+            messages.error(request, 'No image submitted. Please capture an image and try again.')
+            analyses = SkinAnalysis.objects.filter(user=request.user)
+            return render(request, 'dashboard.html', {'analyses': analyses})
+
+        try:
+            format, imgstr = image_data.split(';base64,')
+            image = ContentFile(base64.b64decode(imgstr), name='analysis.png')
+
+            analysis = SkinAnalysis.objects.create(
+                user=request.user,
+                image=image,
+                skin_type='normal',
+                concerns=''
+            )
+
+            result = analyze_image(analysis.image.path)
+
+            analysis.skin_type = result.get('skin_type', 'normal')
+            analysis.concerns = result.get('concerns', '')
+            analysis.skincare_recommendation = ', '.join(result.get('skincare', []))
+            analysis.makeup_recommendation = ', '.join(result.get('makeup', []))
+            analysis.save()
+
+            skin_type = result.get('skin_type', 'normal')
+            concerns = result.get('concerns', '')
+
+            messages.success(request, f"Your skin appears to be {skin_type}.")
+
+            return redirect('analysis_results', analysis_id=analysis.id)
+        except Exception as e:
+            messages.error(request, 'Failed to process the image. Please try again with better lighting.')
+            analyses = SkinAnalysis.objects.filter(user=request.user)
+            return render(request, 'dashboard.html', {'analyses': analyses})
+
     analyses = SkinAnalysis.objects.filter(user=request.user)
     return render(request, 'dashboard.html', {'analyses': analyses})
 
@@ -122,11 +160,11 @@ def analyze(request):
 
                 # Recommendation summary
                 recommendations = {
-                    "Oily": "Use oil-free cleansers and lightweight moisturizers.",
-                    "Dry": "Use gentle cleansers and rich hydrating moisturizers.",
-                    "Combination": "Use balanced skincare and target oily and dry areas separately.",
-                    "Normal": "Maintain a consistent skincare routine.",
-                    "Sensitive": "Use hypoallergenic and gentle skincare products."
+                    "oily": "Use oil-free cleansers and lightweight moisturizers.",
+                    "dry": "Use gentle cleansers and rich hydrating moisturizers.",
+                    "combination": "Use balanced skincare and target oily and dry areas separately.",
+                    "normal": "Maintain a consistent skincare routine.",
+                    "sensitive": "Use hypoallergenic and gentle skincare products."
                 }
 
                 recommendation = recommendations.get(
